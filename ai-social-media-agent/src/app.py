@@ -9,14 +9,6 @@ import sys
 # Add src directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Load environment variables only if running locally
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # dotenv not available on Streamlit Cloud, which is fine
-    pass
-
 # Import our modules with absolute imports
 from models.request_models import SocialMediaRequest, ToneType
 from agents.social_media_agent import SocialMediaAgent, WorkflowRunner
