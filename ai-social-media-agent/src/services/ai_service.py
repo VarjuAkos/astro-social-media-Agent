@@ -12,7 +12,7 @@ class AIService:
     def __init__(self):
         if settings.use_groq:
             if not settings.groq_api_key:
-                raise ValueError("GROQ_API_KEY environment variable is required")
+                raise ValueError("GROQ_API_KEY environment variable is required when using Groq")
             
             self.llm = ChatGroq(
                 api_key=settings.groq_api_key,
@@ -23,7 +23,7 @@ class AIService:
             logger.info(f"Using Groq API with model: {settings.model_name}")
         else:
             if not settings.openai_api_key:
-                raise ValueError("OPENAI_API_KEY environment variable is required")
+                raise ValueError("OPENAI_API_KEY environment variable is required when using OpenAI")
             
             self.llm = ChatOpenAI(
                 api_key=settings.openai_api_key,

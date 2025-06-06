@@ -22,6 +22,14 @@ class Settings:
         self.groq_api_key: Optional[str] = os.getenv("GROQ_API_KEY")
         self.openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
         
+        # Filter out placeholder values for Groq
+        if self.groq_api_key in ["YOUR_NEW_GROQ_API_KEY", "your_groq_api_key_here", None, ""]:
+            self.groq_api_key = None
+            
+        # Filter out placeholder values for OpenAI
+        if self.openai_api_key in ["your_openai_api_key_here", None, ""]:
+            self.openai_api_key = None
+        
         # Use Groq if available, otherwise OpenAI
         if self.groq_api_key:
             self.use_groq = True
