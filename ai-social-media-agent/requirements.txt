@@ -1,0 +1,13 @@
+streamlit
+openai
+pandas
+numpy
+requests
+python-dotenv
+pytest
+langgraph
+langchain
+langchain-openai
+langchain-groq
+pydantic
+typing-extensions
