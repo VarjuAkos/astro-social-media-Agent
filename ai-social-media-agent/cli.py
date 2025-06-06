@@ -16,6 +16,14 @@ load_dotenv()
 from src.models.request_models import SocialMediaRequest, ToneType
 from src.agents.social_media_agent import SocialMediaAgent
 
+def check_environment():
+    """Check if required environment variables are set."""
+    if not os.getenv("GROQ_API_KEY"):
+        print("Error: GROQ_API_KEY environment variable is required")
+        print("Get your free API key from: https://console.groq.com/")
+        return False
+    return True
+
 async def main():
     parser = argparse.ArgumentParser(description='AI Social Media Agent CLI')
     parser.add_argument('--message', '-m', required=True, 
@@ -33,10 +41,8 @@ async def main():
     
     args = parser.parse_args()
     
-    # Check API key
-    if not os.getenv("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY environment variable is required")
-        print("Please set it in your .env file or environment")
+    # Check environment variables
+    if not check_environment():
         return 1
     
     try:

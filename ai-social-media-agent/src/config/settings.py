@@ -18,25 +18,19 @@ class Config:
 
 class Settings:
     def __init__(self):
-        # Try Groq first, then fallback to OpenAI
+        # Only use Groq API
         self.groq_api_key: Optional[str] = os.getenv("GROQ_API_KEY")
-        self.openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
         
         # Filter out placeholder values for Groq
         if self.groq_api_key in ["YOUR_NEW_GROQ_API_KEY", "your_groq_api_key_here", None, ""]:
             self.groq_api_key = None
-            
-        # Filter out placeholder values for OpenAI
-        if self.openai_api_key in ["your_openai_api_key_here", None, ""]:
-            self.openai_api_key = None
         
-        # Use Groq if available, otherwise OpenAI
+        # Always use Groq
         if self.groq_api_key:
             self.use_groq = True
             self.model_name: str = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
         else:
-            self.use_groq = False
-            self.model_name: str = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
+            raise ValueError("GROQ_API_KEY environment variable is required")
             
         self.temperature: float = float(os.getenv("TEMPERATURE", "0.7"))
         self.max_tokens: int = int(os.getenv("MAX_TOKENS", "1500"))

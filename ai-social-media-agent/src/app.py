@@ -39,28 +39,21 @@ if 'context_analysis' not in st.session_state:
     st.session_state.context_analysis = None
 
 def check_api_key():
-    """Check if Groq or OpenAI API key is configured."""
+    """Check if Groq API key is configured."""
     groq_key = os.getenv("GROQ_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
     
     # Check for placeholder values (not real keys)
     if groq_key in ["YOUR_NEW_GROQ_API_KEY", "your_groq_api_key_here", None, ""]:
         groq_key = None
-    if openai_key in ["your_openai_api_key_here", None, ""]:
-        openai_key = None
     
-    # Check if we have at least one valid API key
-    if not groq_key and not openai_key:
-        st.error("⚠️ **API Key Required**")
+    # Check if we have a valid Groq API key
+    if not groq_key:
+        st.error("⚠️ **Groq API Key Required**")
         st.markdown("""
         **For Local Development:**
-        1. Get a free API key from [Groq Console](https://console.groq.com/) (recommended)
+        1. Get a free API key from [Groq Console](https://console.groq.com/)
         2. Create a `.env` file in your project root
         3. Add: `GROQ_API_KEY=your_actual_key_here`
-        
-        **Alternative - OpenAI:**
-        1. Get an API key from [OpenAI](https://platform.openai.com/)
-        2. Add: `OPENAI_API_KEY=your_actual_key_here`
         
         **For Streamlit Cloud:**
         1. Go to your app settings
@@ -69,12 +62,7 @@ def check_api_key():
         """)
         return False
     
-    # Show which API is being used
-    if groq_key:
-        st.success("✅ Using Groq API")
-    elif openai_key:
-        st.success("✅ Using OpenAI API")
-    
+    st.success("✅ Using Groq API")
     return True
 
 async def run_workflow_until_feedback(agent: SocialMediaAgent, request: SocialMediaRequest):

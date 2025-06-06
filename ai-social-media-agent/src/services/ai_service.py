@@ -1,37 +1,23 @@
-from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
-from langchain.schema import HumanMessage, SystemMessage
-from typing import Dict, List, Optional, Any
-import json
-import logging
 from config.settings import settings
+import logging
+import json
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
 class AIService:
     def __init__(self):
-        if settings.use_groq:
-            if not settings.groq_api_key:
-                raise ValueError("GROQ_API_KEY environment variable is required when using Groq")
-            
-            self.llm = ChatGroq(
-                api_key=settings.groq_api_key,
-                model=settings.model_name,
-                temperature=settings.temperature,
-                max_tokens=settings.max_tokens
-            )
-            logger.info(f"Using Groq API with model: {settings.model_name}")
-        else:
-            if not settings.openai_api_key:
-                raise ValueError("OPENAI_API_KEY environment variable is required when using OpenAI")
-            
-            self.llm = ChatOpenAI(
-                api_key=settings.openai_api_key,
-                model=settings.model_name,
-                temperature=settings.temperature,
-                max_tokens=settings.max_tokens
-            )
-            logger.info(f"Using OpenAI API with model: {settings.model_name}")
+        if not settings.groq_api_key:
+            raise ValueError("GROQ_API_KEY environment variable is required")
+        
+        self.llm = ChatGroq(
+            api_key=settings.groq_api_key,
+            model=settings.model_name,
+            temperature=settings.temperature,
+            max_tokens=settings.max_tokens
+        )
+        logger.info(f"Using Groq API with model: {settings.model_name}")
     
     async def analyze_context(self, campaign_message: str, target_audience: str, tone: str) -> Dict[str, Any]:
         """First step: Analyze campaign context and generate initial ideas."""
