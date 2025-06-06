@@ -5,13 +5,17 @@ import logging
 from typing import Dict, Any, Optional
 import os
 import sys
-from dotenv import load_dotenv
 
 # Add src directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Load environment variables
-load_dotenv()
+# Load environment variables only if running locally
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not available on Streamlit Cloud, which is fine
+    pass
 
 # Import our modules with absolute imports
 from models.request_models import SocialMediaRequest, ToneType
@@ -47,9 +51,25 @@ def check_api_key():
     groq_key = os.getenv("GROQ_API_KEY")
     openai_key = os.getenv("OPENAI_API_KEY")
     
+    # Check for placeholder values (not real keys)
+    if groq_key in ["YOUR_NEW_GROQ_API_KEY", "your_groq_api_key_here", None, ""]:
+        groq_key = None
+    if openai_key in ["your_openai_api_key_here", None, ""]:
+        openai_key = None
+    
     if not groq_key and not openai_key:
-        st.error("⚠️ No API key configured. Please set GROQ_API_KEY or OPENAI_API_KEY environment variable.")
-        st.info("You can set it by creating a .env file with: GROQ_API_KEY=your_key_here")
+        st.error("⚠️ **API Key Required**")
+        st.markdown("""
+        **For Local Development:**
+        1. Get a free API key from [Groq Console](https://console.groq.com/)
+        2. Create a `.env` file in your project root
+        3. Add: `GROQ_API_KEY=your_actual_key_here`
+        
+        **For Streamlit Cloud:**
+        1. Go to your app settings
+        2. Click "Secrets" in Advanced settings
+        3. Add: `GROQ_API_KEY = "your_actual_key_here"`
+        """)
         return False
     
     if groq_key:

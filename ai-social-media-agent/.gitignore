@@ -1,0 +1,38 @@
+# Environment variables (local development only)
+.env
+
+# Streamlit secrets (contains API keys)
+secrets.toml
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Distribution
+dist/
+build/
+*.egg-info/
