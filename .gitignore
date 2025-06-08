@@ -1,0 +1,67 @@
+# Environment variables (local development only)
+.env
+.env.example
+*.env
+*.env.*
+
+# Streamlit secrets (contains API keys)
+secrets.toml
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.venv/
+.conda/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pyenv
+.python-version
+
+# Specific project files
+ai-social-media-agent/.env*
+ai-social-media-agent/venv/
+ai-social-media-agent/secrets.toml
+ai-social-media-agent/**/__pycache__/
+ai-social-media-agent/**/*.pyc

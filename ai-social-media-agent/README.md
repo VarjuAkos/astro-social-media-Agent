@@ -21,7 +21,7 @@ A sophisticated AI-powered social media content generator that creates optimized
 5. **Finalization Node** - Outputs final JSON format
 
 ### Key Components
-- **AI Service** - LangChain + OpenAI integration for content generation
+- **AI Service** - LangChain + Groq integration for content generation
 - **Workflow State Management** - Pydantic models for type safety
 - **Platform Optimizers** - Specific constraints and formatting for each platform
 - **Streamlit UI** - Interactive web interface
@@ -30,7 +30,7 @@ A sophisticated AI-powered social media content generator that creates optimized
 
 ### System Requirements
 - Python 3.8+
-- OpenAI API key
+- Groq API key (free tier available)
 - Modern web browser
 
 ### Platform Constraints
@@ -55,7 +55,7 @@ pip install -r requirements.txt
 3. **Configure environment**
 ```bash
 cp .env.example .env
-# Edit .env and add your OpenAI API key
+# Edit .env and add your Groq API key
 ```
 
 4. **Run the application**
@@ -112,8 +112,8 @@ streamlit run src/app.py
 ## 🔧 Configuration
 
 ### Environment Variables
-- `OPENAI_API_KEY` - Required: Your OpenAI API key
-- `MODEL_NAME` - Optional: OpenAI model (default: gpt-3.5-turbo)
+- `GROQ_API_KEY` - Required: Your Groq API key (get free at console.groq.com)
+- `MODEL_NAME` - Optional: Groq model (default: llama-3.3-70b-versatile)
 - `TEMPERATURE` - Optional: AI creativity level (default: 0.7)
 - `MAX_TOKENS` - Optional: Maximum response length (default: 1500)
 
@@ -199,9 +199,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For support and questions:
 - Check the troubleshooting section below
 - Review the example usage
-- Ensure your OpenAI API key is valid and has sufficient credits
+- Ensure your Groq API key is valid and has sufficient credits
 
 ### Troubleshooting
-- **"OpenAI API key not configured"**: Create a `.env` file with your API key
+- **"Groq API key not configured"**: Create a `.env` file with your API key
 - **"Failed to generate posts"**: Check your internet connection and API key validity
 - **UI not loading**: Ensure Streamlit is installed: `pip install streamlit`

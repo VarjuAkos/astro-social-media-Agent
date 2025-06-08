@@ -1,4 +1,5 @@
 from langchain_groq import ChatGroq
+from langchain.schema import SystemMessage, HumanMessage
 from config.settings import settings
 import logging
 import json
@@ -18,9 +19,13 @@ class AIService:
             max_tokens=settings.max_tokens
         )
         logger.info(f"Using Groq API with model: {settings.model_name}")
+        print(f"🤖 AI Service initialized with Groq model: {settings.model_name}")
     
     async def analyze_context(self, campaign_message: str, target_audience: str, tone: str) -> Dict[str, Any]:
         """First step: Analyze campaign context and generate initial ideas."""
+        
+        print("\n🔍 AI SERVICE: CONTEXT ANALYSIS")
+        print("-" * 50)
         
         system_prompt = """
         Te egy kreatív magyar marketing szakértő vagy. A feladatod hogy elemezd a kampányüzenetet és célközönséget, 
@@ -58,18 +63,36 @@ class AIService:
         }}
         """
         
+        print("📤 SENDING TO AI:")
+        print(f"   System Prompt: {system_prompt[:100]}...")
+        print(f"   Human Prompt: {human_prompt[:200]}...")
+        print("   Full prompts logged below:")
+        print("\n🔧 FULL SYSTEM PROMPT:")
+        print(system_prompt)
+        print("\n📝 FULL HUMAN PROMPT:")
+        print(human_prompt)
+        
         try:
             messages = [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)]
+            print("\n⏳ Sending request to Groq API...")
             response = await self.llm.ainvoke(messages)
+            
+            print(f"\n📥 RAW AI RESPONSE:")
+            print(f"   Length: {len(response.content)} characters")
+            print(f"   Content: {response.content}")
             
             # Try to parse JSON response
             parsed_response = json.loads(response.content)
+            print(f"\n✅ PARSED JSON RESPONSE:")
+            print(json.dumps(parsed_response, indent=2, ensure_ascii=False))
             return parsed_response
             
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            print(f"\n❌ JSON PARSE ERROR: {e}")
+            print(f"   Raw content: {response.content}")
             logger.error(f"Failed to parse context analysis response: {response.content}")
             # Return a default structure that matches expected format
-            return {
+            fallback = {
                 "key_messages": ["Kampány üzenet elemzése"],
                 "audience_insights": f"Célközönség: {target_audience}",
                 "platform_strategies": {
@@ -80,10 +103,13 @@ class AIService:
                 },
                 "creative_directions": ["Engaging tartalom", "Platform-specifikus optimalizáció", "Célközönség-fókusz"]
             }
+            print(f"🔄 Using fallback response: {json.dumps(fallback, indent=2, ensure_ascii=False)}")
+            return fallback
         except Exception as e:
+            print(f"\n❌ AI SERVICE ERROR: {e}")
             logger.error(f"Context analysis failed: {e}")
             # Return a default structure instead of error dict
-            return {
+            fallback = {
                 "key_messages": ["Kampány üzenet"],
                 "audience_insights": f"Célközönség: {target_audience}",
                 "platform_strategies": {
@@ -94,10 +120,15 @@ class AIService:
                 },
                 "creative_directions": ["Kreatív megközelítés"]
             }
+            print(f"🔄 Using fallback response due to error: {json.dumps(fallback, indent=2, ensure_ascii=False)}")
+            return fallback
     
     async def generate_platform_posts(self, context: Dict, campaign_message: str, 
                                     target_audience: str, tone: str, use_emojis: bool) -> Dict[str, Dict]:
         """Second step: Generate platform-specific posts based on context analysis."""
+        
+        print("\n📝 AI SERVICE: PLATFORM POSTS GENERATION")
+        print("-" * 50)
         
         emoji_instruction = "Használj releváns emojikat" if use_emojis else "Ne használj emojikat"
         
@@ -146,12 +177,29 @@ class AIService:
         }}
         """
         
+        print("📤 SENDING TO AI:")
+        print(f"   Context: {json.dumps(context, ensure_ascii=False)}")
+        print(f"   Campaign: {campaign_message}")
+        print(f"   Audience: {target_audience}")
+        print(f"   Tone: {tone}")
+        print(f"   Emojis: {use_emojis}")
+        
+        print("\n🔧 FULL SYSTEM PROMPT:")
+        print(system_prompt)
+        print("\n📝 FULL HUMAN PROMPT:")
+        print(human_prompt)
+        
         try:
             messages = [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)]
+            print("\n⏳ Sending request to Groq API...")
             response = await self.llm.ainvoke(messages)
             
             # Clean the response content to extract JSON
             content = response.content.strip()
+            
+            print(f"\n📥 RAW AI RESPONSE:")
+            print(f"   Length: {len(content)} characters")
+            print(f"   Content: {content}")
             
             # Try to find JSON in the response
             json_start = content.find('{')
@@ -159,23 +207,133 @@ class AIService:
             
             if json_start != -1 and json_end > json_start:
                 json_content = content[json_start:json_end]
+                print(f"\n🔍 EXTRACTED JSON:")
+                print(json_content)
+                
                 parsed_response = json.loads(json_content)
+                print(f"\n✅ PARSED JSON RESPONSE:")
+                print(json.dumps(parsed_response, indent=2, ensure_ascii=False))
                 logger.info("Successfully parsed posts generation response")
                 return parsed_response
             else:
                 raise json.JSONDecodeError("No JSON found in response", content, 0)
                 
         except json.JSONDecodeError as e:
+            print(f"\n❌ JSON PARSE ERROR: {e}")
+            print(f"   Trying to extract from: {content}")
             logger.error(f"Failed to parse posts generation response: {content}")
             # Return fallback posts with the campaign message
-            return self._generate_fallback_posts(campaign_message, target_audience, tone, use_emojis)
+            fallback = self._generate_fallback_posts(campaign_message, target_audience, tone, use_emojis)
+            print(f"🔄 Using fallback posts: {json.dumps(fallback, indent=2, ensure_ascii=False)}")
+            return fallback
         except Exception as e:
+            print(f"\n❌ AI SERVICE ERROR: {e}")
             logger.error(f"Posts generation failed: {e}")
-            return self._generate_fallback_posts(campaign_message, target_audience, tone, use_emojis)
+            fallback = self._generate_fallback_posts(campaign_message, target_audience, tone, use_emojis)
+            print(f"🔄 Using fallback posts due to error: {json.dumps(fallback, indent=2, ensure_ascii=False)}")
+            return fallback
+    
+    async def refine_posts(self, current_posts: Dict, feedback: str) -> Dict[str, Dict]:
+        """Third step: Refine posts based on user feedback."""
+        
+        print("\n🔧 AI SERVICE: POST REFINEMENT")
+        print("-" * 50)
+        
+        system_prompt = """
+        Te egy szakértő közösségi média tartalomkészítő vagy. A felhasználó visszajelzést adott a meglévő posztokra, 
+        és a feladatod hogy javítsd őket a visszajelzés alapján.
+        
+        Platform korlátok:
+        - Facebook: max 63206 karakter, max 30 hashtag
+        - Instagram: max 2200 karakter, max 30 hashtag, 2 kép ötlet kell
+        - LinkedIn: max 1300 karakter, max 3 hashtag, professzionális hangnem
+        - X (Twitter): max 280 karakter, max 2 hashtag
+        
+        FONTOS: Válaszolj CSAK valid JSON formátumban, semmi mással!
+        """
+        
+        human_prompt = f"""
+        Jelenlegi posztok: {json.dumps(current_posts, ensure_ascii=False)}
+        
+        Felhasználói visszajelzés: {feedback}
+        
+        Javítsd a posztokat a visszajelzés alapján. Válaszold CSAK JSON formátumban:
+        {{
+            "facebook": {{
+                "text": "...",
+                "hashtags": ["tag1", "tag2"]
+            }},
+            "instagram": {{
+                "text": "...",
+                "hashtags": ["tag1", "tag2"],
+                "image_suggestions": ["kép1", "kép2"]
+            }},
+            "linkedin": {{
+                "text": "...",
+                "hashtags": ["tag1"]
+            }},
+            "x": {{
+                "text": "...",
+                "hashtags": ["tag1"]
+            }}
+        }}
+        """
+        
+        print("📤 SENDING TO AI:")
+        print(f"   Current posts: {json.dumps(current_posts, ensure_ascii=False)}")
+        print(f"   Feedback: {feedback}")
+        
+        print("\n🔧 FULL SYSTEM PROMPT:")
+        print(system_prompt)
+        print("\n📝 FULL HUMAN PROMPT:")
+        print(human_prompt)
+        
+        try:
+            messages = [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)]
+            print("\n⏳ Sending refinement request to Groq API...")
+            response = await self.llm.ainvoke(messages)
+            
+            content = response.content.strip()
+            
+            print(f"\n📥 RAW AI RESPONSE:")
+            print(f"   Length: {len(content)} characters")
+            print(f"   Content: {content}")
+            
+            # Try to find JSON in the response
+            json_start = content.find('{')
+            json_end = content.rfind('}') + 1
+            
+            if json_start != -1 and json_end > json_start:
+                json_content = content[json_start:json_end]
+                print(f"\n🔍 EXTRACTED JSON:")
+                print(json_content)
+                
+                parsed_response = json.loads(json_content)
+                print(f"\n✅ PARSED REFINEMENT RESPONSE:")
+                print(json.dumps(parsed_response, indent=2, ensure_ascii=False))
+                logger.info("Successfully parsed refinement response")
+                return parsed_response
+            else:
+                raise json.JSONDecodeError("No JSON found in refinement response", content, 0)
+                
+        except json.JSONDecodeError as e:
+            print(f"\n❌ REFINEMENT JSON PARSE ERROR: {e}")
+            print(f"   Trying to extract from: {content}")
+            logger.error(f"Failed to parse refinement response: {content}")
+            print("🔄 Returning original posts due to parse error")
+            return current_posts
+        except Exception as e:
+            print(f"\n❌ REFINEMENT AI SERVICE ERROR: {e}")
+            logger.error(f"Posts refinement failed: {e}")
+            print("🔄 Returning original posts due to error")
+            return current_posts
     
     def _generate_fallback_posts(self, campaign_message: str, target_audience: str, 
                                 tone: str, use_emojis: bool) -> Dict[str, Dict]:
         """Generate fallback posts when AI service fails."""
+        print("\n🔄 GENERATING FALLBACK POSTS")
+        print("-" * 30)
+        
         emoji = "🎯" if use_emojis else ""
         
         tone_prefix = {
@@ -188,7 +346,7 @@ class AIService:
         
         base_text = f"{tone_prefix} {campaign_message}"
         
-        return {
+        fallback = {
             "facebook": {
                 "text": f"{base_text}\n\nKövess minket további frissítésekért!",
                 "hashtags": ["#szakmai", "#fejlődés", "#tréning"]
@@ -207,3 +365,7 @@ class AIService:
                 "hashtags": ["#szakmai", "#tréning"]
             }
         }
+        
+        print(f"📋 Generated fallback:")
+        print(json.dumps(fallback, indent=2, ensure_ascii=False))
+        return fallback
